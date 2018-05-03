@@ -68,12 +68,7 @@ function deleteFromParent(button, list) {
 
 function getAll(selector) {  
   let spans = document.querySelectorAll(selector);
-  let array = [];
-  
-  for(let i = 0; i < spans.length; i++) {
-    array.push(spans[i].innerText);
-  }
-  
+  let array = Array.prototype.map.call(spans, (event) => event.innerText);
   return array;
 }
 
@@ -120,11 +115,8 @@ function cleanStorage(property) {
 function loadSearchToList(property) {
   let propertyValue = localStorage.getItem(property);
   let propertyObject = JSON.parse(propertyValue);
-  console.log(propertyObject);
   
-  propertyObject.forEach( (e) => {
-    appendToSearchList(recentSearchList, e);
-  });
+  propertyObject.forEach((e) => appendToSearchList(recentSearchList, e));
 }
 
 /*====================================================================
