@@ -11,6 +11,17 @@ const clearButton = document.getElementById('clearStorage');
     BASIC FUNCTIONS
 ====================================================================*/
 
+/* CHECK for support local storage
+===============================================*/
+
+function supportsLocalStorage() {
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch(e){
+    return false;
+  }
+}
+
 /* CREATE element
 ===============================================*/
 
@@ -88,8 +99,8 @@ function setStorage(property, value) {
 ===============================================*/
 
 function updateSearchStorage() {
-  let value = getAll("span.search-item--text");
-  setStorage("search", value.toString());
+  let value = getAll("span.search-item--text");  
+  setStorage("search", JSON.stringify(value));
 }
 
 /* CLEAN storage item
@@ -99,7 +110,7 @@ function cleanStorage(property) {
   if(property) {
     delete localStorage.removeItem(property);
   } else {
-    delete localStorage;
+    localStorage.clear();
   }
 }
 
@@ -108,9 +119,10 @@ function cleanStorage(property) {
 
 function loadSearchToList(property) {
   let propertyValue = localStorage.getItem(property);
-  propertyValue = propertyValue.split(',')
+  let propertyObject = JSON.parse(propertyValue);
+  console.log(propertyObject);
   
-  propertyValue.forEach( (e) => {
+  propertyObject.forEach( (e) => {
     appendToSearchList(recentSearchList, e);
   });
 }
@@ -119,46 +131,53 @@ function loadSearchToList(property) {
     EVENT LISTENERS
 ====================================================================*/
 
-/* SEARCH FORM listener
-===============================================*/
-
-searchForm.addEventListener("submit", (e) => {
-  e.preventDefault();
+window.onload = function() {
   
-  if (!searchBar.value) {
-    alert("You have to enter some search phrase!");
-  } else {
-    appendToSearchList(recentSearchList, searchBar.value);
-    updateSearchStorage();
-    searchBar.value = "";
-  }
-});
-
-/* SEARCH LIST listener
-===============================================*/
-
-recentSearchList.addEventListener("click", (e) => {
-  let but = e.target;
+  if (supportsLocalStorage()) {
   
-  if (but.className === "delete-button") {
-    deleteFromParent(but, recentSearchList);
-    updateSearchStorage();
-  }
-});
-
-/* CLEAR BUTTON listener
-===============================================*/
-
-clearButton.addEventListener("click", (e) => {
-  e.preventDefault();
-  cleanStorage("search");
-  cleanSearchList(recentSearchList);
-});
-
-/*====================================================================
-    RUN IMMEDIATELY
-====================================================================*/
-
-if (localStorage.search) {
-  loadSearchToList("search");
-}
+    /* SEARCH FORM listener
+    ===============================================*/
+    
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      if (!searchBar.value) {
+        alert("You have to enter some search phrase!");
+      } else {
+        appendToSearchList(recentSearchList, searchBar.value);
+        updateSearchStorage();
+        searchBar.value = "";
+      }
+    });
+    
+    /* SEARCH LIST listener
+    ===============================================*/
+    
+    recentSearchList.addEventListener("click", (e) => {
+      let but = e.target;
+      
+      if (but.className === "delete-button") {
+        deleteFromParent(but, recentSearchList);
+        updateSearchStorage();
+      }
+    });
+    
+    /* CLEAR BUTTON listener
+    ===============================================*/
+    
+    clearButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      cleanStorage("search");
+      cleanSearchList(recentSearchList);
+    });
+    
+    /*====================================================================
+        RUN IMMEDIATELY
+    ====================================================================*/
+    
+    if (localStorage.search) {
+      loadSearchToList("search");
+    }
+      
+  } //end if support localstorage
+} // end of window.onload
